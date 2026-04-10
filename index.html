@@ -1,133 +1,126 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2868
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Gia Phả Dòng Họ</title>
+    <!-- Tải thư viện Balkan FamilyTree và PapaParse -->
+    <script src="https://balkan.app/js/familytree.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        html, body { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            overflow: hidden; background-color: #212121; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        }
+        #tree { width: 100%; height: 100%; }
+        #loading { 
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            color: #fff; z-index: 1000; background: rgba(0,0,0,0.85); padding: 30px; 
+            border-radius: 15px; border: 1px solid #d4af37; text-align: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        /* Tùy chỉnh thanh tìm kiếm */
+        .bft-search-control input { border-radius: 20px !important; }
+    </style>
+</head>
+<body>
 
-\f0\fs24 \cf0 <!DOCTYPE html>\
-<html lang="vi">\
-<head>\
-    <meta charset="UTF-8">\
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">\
-    <title>H\uc0\u7879  Th\u7889 ng Gia Ph\u7843  D\'f2ng H\u7885 </title>\
-    <!-- T\uc0\u7843 i th\u432  vi\u7879 n Balkan FamilyTree v\'e0 PapaParse -->\
-    <script src="https://balkan.app/js/familytree.js"></script>\
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>\
-    <style>\
-        html, body \{ \
-            margin: 0; padding: 0; width: 100%; height: 100%; \
-            overflow: hidden; background-color: #212121; \
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; \
-        \}\
-        #tree \{ width: 100%; height: 100%; \}\
-        #loading \{ \
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); \
-            color: #fff; z-index: 1000; background: rgba(0,0,0,0.85); padding: 30px; \
-            border-radius: 15px; border: 1px solid #d4af37; text-align: center;\
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);\
-        \}\
-        /* T\'f9y ch\uc0\u7881 nh thanh t\'ecm ki\u7871 m */\
-        .bft-search-control input \{ border-radius: 20px !important; \}\
-    </style>\
-</head>\
-<body>\
-\
-    <div id="loading">\
-        <div style="font-size: 20px; margin-bottom: 10px;">\uc0\u55356 \u57119  \u272 ang kh\u7903 i t\u7841 o d\u7919  li\u7879 u gia t\u7897 c...</div>\
-        <div style="font-size: 14px; color: #aaa;">Vui l\'f2ng \uc0\u273 \u7907 i trong gi\'e2y l\'e1t</div>\
-    </div>\
-    \
-    <div id="tree"></div>\
-\
-    <script>\
-        // Link CSV \uc0\u273 \'e3 \u273 \u432 \u7907 c t\'edch h\u7907 p tr\u7921 c ti\u7871 p\
-        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTouJUB4GpQB_VQ9JNfO2DAp26KLsS94ODZqf7XclWZbm-nWXy1RzJpxq2BW7RX9do0wfqxgCN1uYyn/pub?output=csv";\
-\
-        function renderTree(rawData) \{\
-            // \uc0\u7848 n th\'f4ng b\'e1o \u273 ang t\u7843 i\
-            document.getElementById('loading').style.display = 'none';\
-\
-            // X\uc0\u7917  l\'fd d\u7919  li\u7879 u th\'f4 t\u7915  CSV sang \u273 \u7883 nh d\u7841 ng Nodes c\u7911 a Balkan\
-            const cleanNodes = rawData.map(item => \{\
-                let row = \{\};\
-                // Trim kho\uc0\u7843 ng tr\u7855 ng th\u7915 a trong ti\'eau \u273 \u7873  c\u7897 t\
-                for (let key in item) \{ row[key.trim()] = item[key]; \}\
-\
-                // X\uc0\u7917  l\'fd m\u7843 ng V\u7907 /Ch\u7891 ng (PIDS)\
-                let pidsVal = null;\
-                if (row["PIDS"]) \{\
-                    let rawPids = String(row["PIDS"]).replace(/[\\[\\]\\s]/g, ''); \
-                    if (rawPids) pidsVal = rawPids.split(',').filter(x => x).map(Number);\
-                \}\
-\
-                return \{\
-                    id: Number(row["ID"]),\
-                    fid: row["FID"] ? Number(row["FID"]) : null,\
-                    mid: row["MID"] ? Number(row["MID"]) : null,\
-                    pids: pidsVal,\
-                    name: row["H\uc0\u7885  V\'e0 T\'ean"] || "Ch\u432 a r\'f5 t\'ean",\
-                    gender: String(row["Gi\uc0\u7899 i t\'ednh"]).toLowerCase().trim() === "n\u7919 " ? "female" : "male",\
-                    birth: row["N\uc0\u259 m sinh"] || "Ch\u432 a r\'f5",\
-                    death: row["N\uc0\u259 m m\u7845 t"] || "C\'f2n s\u7889 ng",\
-                    life: row["V\'f2ng \uc0\u273 \u7901 i"] || "", // S\u7869  hi\u7879 n d\'f2ng 2 tr\'ean s\u417  \u273 \u7891 \
-                    img: row["Photo"] || "", \
-                    notes: row["Ghi ch\'fa"] || ""\
-                \};\
-            \}).filter(node => !isNaN(node.id)); // Lo\uc0\u7841 i b\u7887  d\'f2ng tr\u7889 ng ho\u7863 c l\u7895 i ID\
-\
-            // Kh\uc0\u7903 i t\u7841 o s\u417  \u273 \u7891 \
-            const chart = new FamilyTree(document.getElementById("tree"), \{\
-                mouseScrol: FamilyTree.action.zoom,\
-                enableSearch: true,\
-                template: "hugo", // Giao di\uc0\u7879 n t\u7889 i gi\u7843 n hi\u7879 n \u273 \u7841 i\
-                mode: "dark",\
-                readOnly: true,\
-                \
-                // C\uc0\u7845 u h\'ecnh thu ph\'f3ng nh\'e1nh (N\'fat +/-)\
-                collapse: \{ \
-                    level: 3, // M\uc0\u7863 c \u273 \u7883 nh m\u7903  \u273 \u7871 n \u273 \u7901 i th\u7913  3\
-                    allChildren: true \
-                \},\
-                nodeCircleSize: 20,\
-\
-                // C\uc0\u7845 u h\'ecnh b\u7843 ng chi ti\u7871 t khi nh\u7845 n v\'e0o 1 ng\u432 \u7901 i\
-                editForm: \{\
-                    readOnly: true,\
-                    titleBinding: "name",\
-                    photoBinding: "img",\
-                    buttons: \{ edit: null, share: null, pdf: null, remove: null \},\
-                    elements: [\
-                        \{ type: 'textbox', label: 'H\uc0\u7885  V\'e0 T\'ean', binding: 'name' \},\
-                        \{ type: 'textbox', label: 'Ng\'e0y Th\'e1ng N\uc0\u259 m Sinh', binding: 'birth' \},\
-                        \{ type: 'textbox', label: 'Ng\'e0y Th\'e1ng N\uc0\u259 m M\u7845 t', binding: 'death' \},\
-                        \{ type: 'fullwidth', label: 'Ti\uc0\u7875 u s\u7917  / Ghi ch\'fa', binding: 'notes' \}\
-                    ]\
-                \},\
-\
-                // G\'e1n d\uc0\u7919  li\u7879 u hi\u7875 n th\u7883  l\'ean \'f4 vu\'f4ng tr\'ean s\u417  \u273 \u7891 \
-                nodeBinding: \{\
-                    field_0: "name", // D\'f2ng 1\
-                    field_1: "life", // D\'f2ng 2: Hi\uc0\u7879 n "V\'f2ng \u273 \u7901 i" (N\u259 m sinh - N\u259 m m\u7845 t)\
-                    img_0: "img"     // Hi\uc0\u7879 n \u7843 nh\
-                \},\
-                nodes: cleanNodes\
-            \});\
-        \}\
-\
-        // Th\uc0\u7921 c hi\u7879 n t\u7843 i d\u7919  li\u7879 u CSV\
-        Papa.parse(SHEET_CSV_URL, \{\
-            download: true,\
-            header: true,\
-            skipEmptyLines: true,\
-            complete: function(results) \{\
-                renderTree(results.data);\
-            \},\
-            error: function() \{\
-                document.getElementById('loading').innerHTML = \
-                    "<b style='color:#ff5252'>L\uc0\u7895 i d\u7919  li\u7879 u:</b> Kh\'f4ng th\u7875  k\u7871 t n\u7889 i v\u7899 i file Google Sheets c\u7911 a b\u7841 n. H\'e3y \u273 \u7843 m b\u7843 o b\u7841 n \u273 \'e3 'Xu\u7845 t b\u7843 n l\'ean web' \u273 \'fang \u273 \u7883 nh d\u7841 ng CSV.";\
-            \}\
-        \});\
-    </script>\
-</body>\
-</html>}
+    <div id="loading">
+        <div style="font-size: 20px; margin-bottom: 10px;">🌟 Đang khởi tạo dữ liệu gia tộc...</div>
+        <div style="font-size: 14px; color: #aaa;">Vui lòng đợi trong giây lát</div>
+    </div>
+    
+    <div id="tree"></div>
+
+    <script>
+        // Link CSV đã được tích hợp trực tiếp
+        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTouJUB4GpQB_VQ9JNfO2DAp26KLsS94ODZqf7XclWZbm-nWXy1RzJpxq2BW7RX9do0wfqxgCN1uYyn/pub?output=csv";
+
+        function renderTree(rawData) {
+            // Ẩn thông báo đang tải
+            document.getElementById('loading').style.display = 'none';
+
+            // Xử lý dữ liệu thô từ CSV sang định dạng Nodes của Balkan
+            const cleanNodes = rawData.map(item => {
+                let row = {};
+                // Trim khoảng trắng thừa trong tiêu đề cột
+                for (let key in item) { row[key.trim()] = item[key]; }
+
+                // Xử lý mảng Vợ/Chồng (PIDS)
+                let pidsVal = null;
+                if (row["PIDS"]) {
+                    let rawPids = String(row["PIDS"]).replace(/[\[\]\s]/g, ''); 
+                    if (rawPids) pidsVal = rawPids.split(',').filter(x => x).map(Number);
+                }
+
+                return {
+                    id: Number(row["ID"]),
+                    fid: row["FID"] ? Number(row["FID"]) : null,
+                    mid: row["MID"] ? Number(row["MID"]) : null,
+                    pids: pidsVal,
+                    name: row["Họ Và Tên"] || "Chưa rõ tên",
+                    gender: String(row["Giới tính"]).toLowerCase().trim() === "nữ" ? "female" : "male",
+                    birth: row["Năm sinh"] || "Chưa rõ",
+                    death: row["Năm mất"] || "Còn sống",
+                    life: row["Vòng đời"] || "", // Sẽ hiện dòng 2 trên sơ đồ
+                    img: row["Photo"] || "", 
+                    notes: row["Ghi chú"] || ""
+                };
+            }).filter(node => !isNaN(node.id)); // Loại bỏ dòng trống hoặc lỗi ID
+
+            // Khởi tạo sơ đồ
+            const chart = new FamilyTree(document.getElementById("tree"), {
+                mouseScrol: FamilyTree.action.zoom,
+                enableSearch: true,
+                template: "hugo", // Giao diện tối giản hiện đại
+                mode: "dark",
+                readOnly: true,
+                
+                // Cấu hình thu phóng nhánh (Nút +/-)
+                collapse: { 
+                    level: 3, // Mặc định mở đến đời thứ 3
+                    allChildren: true 
+                },
+                nodeCircleSize: 20,
+
+                // Cấu hình bảng chi tiết khi nhấn vào 1 người
+                editForm: {
+                    readOnly: true,
+                    titleBinding: "name",
+                    photoBinding: "img",
+                    buttons: { edit: null, share: null, pdf: null, remove: null },
+                    elements: [
+                        { type: 'textbox', label: 'Họ Và Tên', binding: 'name' },
+                        { type: 'textbox', label: 'Ngày Tháng Năm Sinh', binding: 'birth' },
+                        { type: 'textbox', label: 'Ngày Tháng Năm Mất', binding: 'death' },
+                        { type: 'fullwidth', label: 'Tiểu sử / Ghi chú', binding: 'notes' }
+                    ]
+                },
+
+                // Gán dữ liệu hiển thị lên ô vuông trên sơ đồ
+                nodeBinding: {
+                    field_0: "name", // Dòng 1
+                    field_1: "life", // Dòng 2: Hiện "Vòng đời" (Năm sinh - Năm mất)
+                    img_0: "img"     // Hiện ảnh
+                },
+                nodes: cleanNodes
+            });
+        }
+
+        // Thực hiện tải dữ liệu CSV
+        Papa.parse(SHEET_CSV_URL, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                renderTree(results.data);
+            },
+            error: function() {
+                document.getElementById('loading').innerHTML = 
+                    "<b style='color:#ff5252'>Lỗi dữ liệu:</b> Không thể kết nối với file Google Sheets của bạn. Hãy đảm bảo bạn đã 'Xuất bản lên web' đúng định dạng CSV.";
+            }
+        });
+    </script>
+</body>
+</html>
