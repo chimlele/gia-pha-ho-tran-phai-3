@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ Thống Gia Phả Dòng Họ</title>
-    <!-- Tải thư viện Balkan FamilyTree và PapaParse -->
     <script src="https://balkan.app/js/familytree.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
@@ -22,6 +21,22 @@
         }
         /* Tùy chỉnh thanh tìm kiếm */
         .bft-search-control input { border-radius: 20px !important; }
+
+        /* ĐỊNH NGHĨA MÀU SẮC NAM/NỮ */
+        /* Màu xanh cho Nam (male) */
+        .bft-dark .node.male rect {
+            fill: #1565C0; /* Màu xanh đậm */
+            stroke: #90CAF9; /* Viền xanh nhạt */
+        }
+        /* Màu hồng cho Nữ (female) */
+        .bft-dark .node.female rect {
+            fill: #C62828; /* Màu đỏ/hồng đậm */
+            stroke: #EF9A9A; /* Viền hồng nhạt */
+        }
+        /* Tùy chỉnh màu chữ để dễ đọc trên nền màu */
+        .node.male text, .node.female text {
+            fill: #ffffff !important;
+        }
     </style>
 </head>
 <body>
@@ -54,13 +69,21 @@
                     if (rawPids) pidsVal = rawPids.split(',').filter(x => x).map(Number);
                 }
 
+                // CHUẨN HÓA DỮ LIỆU GIỚI TÍNH ĐỂ PHÂN MÀU
+                let genderVal = String(row["Giới tính"]).toLowerCase().trim();
+                let genderClass = "male"; // Mặc định là nam nếu không rõ
+                if (genderVal === "nữ" || genderVal === "female") {
+                    genderClass = "female";
+                }
+
                 return {
                     id: Number(row["ID"]),
                     fid: row["FID"] ? Number(row["FID"]) : null,
                     mid: row["MID"] ? Number(row["MID"]) : null,
                     pids: pidsVal,
                     name: row["Họ Và Tên"] || "Chưa rõ tên",
-                    gender: String(row["Giới tính"]).toLowerCase().trim() === "nữ" ? "female" : "male",
+                    // Balkan dùng trường 'gender' để tự động áp dụng class CSS 'male' hoặc 'female'
+                    gender: genderClass, 
                     birth: row["Năm sinh"] || "Chưa rõ",
                     death: row["Năm mất"] || "Còn sống",
                     life: row["Vòng đời"] || "", // Sẽ hiện dòng 2 trên sơ đồ
@@ -73,7 +96,8 @@
             const chart = new FamilyTree(document.getElementById("tree"), {
                 mouseScrol: FamilyTree.action.zoom,
                 enableSearch: true,
-                template: "hugo", // Giao diện tối giản hiện đại
+                // SỬ DỤNG TEMPLATE 'base' ĐỂ DỄ DÀNG TÙY BIẾN MÀU SẮC QUA CSS
+                template: "base", 
                 mode: "dark",
                 readOnly: true,
                 
