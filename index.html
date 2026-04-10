@@ -3,22 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gia Phả Dòng Họ - Bản Chuẩn</title>
+    <title>Gia Phả Dòng Họ</title>
     <script src="https://balkan.app/js/familytree.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
-        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #212121; font-family: 'Segoe UI', Arial, sans-serif; }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #1a1a1a; font-family: 'Segoe UI', Arial, sans-serif; }
         #tree { width: 100%; height: 100%; }
-        #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; z-index: 1000; background: rgba(0,0,0,0.9); padding: 25px; border-radius: 10px; border: 2px solid #d4af37; text-align: center; }
-
-        /* ĐỊNH NGHĨA MÀU SẮC NAM/NỮ */
-        .node.male rect { fill: #1565C0 !important; } /* Màu xanh */
-        .node.female rect { fill: #AD1457 !important; } /* Màu hồng */
+        /* Ẩn hoàn toàn thanh công cụ và tìm kiếm của thư viện */
+        .bft-search-control, .bft-toolbar { display: none !important; }
+        #loading { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; z-index: 1000; background: rgba(0,0,0,0.9); padding: 20px; border-radius: 8px; border: 1px solid #d4af37; }
+        
+        /* Màu sắc Nam/Nữ */
+        .node.male rect { fill: #1565C0 !important; } 
+        .node.female rect { fill: #AD1457 !important; }
     </style>
 </head>
 <body>
 
-    <div id="loading">🌟 Đang tải dữ liệu gia hệ...</div>
+    <div id="loading">Đang tải dữ liệu gia phả...</div>
     <div id="tree"></div>
 
     <script>
@@ -37,7 +39,6 @@
                     if (rawPids) pidsVal = rawPids.split(',').filter(x => x).map(Number);
                 }
 
-                // Gắn Tag để phân biệt màu sắc
                 let genderTag = String(row["Giới tính"]).toLowerCase().trim() === "nữ" ? "female" : "male";
 
                 return {
@@ -46,7 +47,7 @@
                     mid: row["MID"] ? Number(row["MID"]) : null,
                     pids: pidsVal,
                     name: row["Họ Và Tên"] || "Không rõ",
-                    tags: [genderTag], // Dùng Tags để đổi màu
+                    tags: [genderTag],
                     life: row["Vòng đời"] || "",
                     img: row["Photo"] || "", 
                     notes: row["Ghi chú"] || ""
@@ -57,18 +58,14 @@
                 template: "hugo",
                 mode: "dark",
                 readOnly: true,
-                enableSearch: true,
-                mouseScrol: FamilyTree.action.zoom,
+                enableSearch: false, // Tắt tìm kiếm
                 enablePan: true,
-                nodeCircleSize: 20,
+                mouseScrol: FamilyTree.action.zoom,
                 
-                // Nút chức năng điều hướng
-                toolbar: { zoom: true, fit: true, fullScreen: true },
-
-                // HIỆN TẤT CẢ - KHÔNG THU GỌN
+                // QUAN TRỌNG: Tắt hoàn toàn chức năng thu gọn nhánh (+/-)
                 collapse: false, 
-
-                // POPUP CHI TIẾT
+                
+                // Popup chi tiết khi nhấn vào người
                 editForm: {
                     readOnly: true,
                     buttons: { edit: null, share: null, pdf: null, remove: null },
@@ -87,7 +84,7 @@
                 nodes: cleanNodes
             });
 
-            // Ép mở Popup khi click vào bất kỳ đâu trên ô
+            // Mở thông tin khi nhấn vào ô
             chart.on('click', function (sender, args) {
                 sender.editUI.show(args.node.id, true);
                 return false; 
